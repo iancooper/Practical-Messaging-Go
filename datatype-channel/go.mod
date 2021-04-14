@@ -1,0 +1,1 @@
+module "github.com/iancooper/Practical-Messaging-Go/datatype-channel"
