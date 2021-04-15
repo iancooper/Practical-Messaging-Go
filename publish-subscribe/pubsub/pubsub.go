@@ -1,26 +1,24 @@
-package p2pchannel
+package pubsub
 
 import (
 	"github.com/streadway/amqp"
 	"log"
 )
 
-type p2p struct {
-	xchng      string
-	queueName  string
-	routingKey string
-	conn       *amqp.Connection
+type pubsub struct {
+	xchng     string
+	queueName string
+	conn      *amqp.Connection
 }
 
 //We just use a contant here for convenience, in reality you configure this
-const exchange = "practical-messaging-go"
+const exchange = "practical-messaging-go-fanout"
 
-func NewChannel(qName string) *p2p {
+func NewChannel(qName string) *pubsub {
 
-	channel := new(p2p)
+	channel := new(pubsub)
 	channel.xchng = exchange
 	channel.queueName = qName
-	channel.routingKey = qName
 
 	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
 	failOnError(err, "Failed to connect to RabbitMQ", channel)
@@ -32,7 +30,7 @@ func NewChannel(qName string) *p2p {
 
 	err = ch.ExchangeDeclare(
 		exchange, // name
-		"direct", // type
+		"fanout", // type
 		false,    // durable
 		false,    // auto-deleted
 		false,    // internal
@@ -52,9 +50,9 @@ func NewChannel(qName string) *p2p {
 	failOnError(err, "Failed to declare a queue", channel)
 
 	err = ch.QueueBind(
-		channel.queueName,  // queue name
-		channel.routingKey, // routing key
-		exchange,           // exchange
+		channel.queueName, // queue name
+		"",                // no routing key on fanout
+		exchange,          // exchange
 		false,
 		nil)
 	failOnError(err, "Failed to bind a queue", channel)
@@ -62,7 +60,7 @@ func NewChannel(qName string) *p2p {
 	return channel
 }
 
-func (channel *p2p) Receive() (bool, string) {
+func (channel *pubsub) Receive() (bool, string) {
 	ch, err := channel.conn.Channel()
 	failOnError(err, "Failed to connect to RabbitMQ", channel)
 	defer ch.Close()
@@ -80,16 +78,16 @@ func (channel *p2p) Receive() (bool, string) {
 	}
 }
 
-func (channel *p2p) Send(message string) {
+func (channel *pubsub) Send(message string) {
 	ch, err := channel.conn.Channel()
 	failOnError(err, "Failed to connect to RabbitMQ", channel)
 	defer ch.Close()
 
 	err = ch.Publish(
-		channel.xchng,      //exchange
-		channel.routingKey, //routing key
-		false,              //mandatory
-		false,              //immediate
+		channel.xchng, //exchange
+		"",            //routing key
+		false,         //mandatory
+		false,         //immediate
 		amqp.Publishing{
 			ContentType: "text/plain",
 			Body:        []byte(message),
@@ -97,18 +95,18 @@ func (channel *p2p) Send(message string) {
 	failOnError(err, "Error sending message to RabbitMQ", channel)
 }
 
-func (channel *p2p) Close() {
+func (channel *pubsub) Close() {
 	if channel.conn != nil {
 		channel.conn.Close()
 	}
 }
 
-func failOnError(err error, msg string, channel *p2p) {
+func failOnError(err error, msg string, channel *pubsub) {
 	if err != nil {
 		if channel.conn != nil {
 			channel.conn.Close()
 
-		log.Fatalf("%s: %s", msg, err)
+			log.Fatalf("%s: %s", msg, err)
 		}
 	}
 }

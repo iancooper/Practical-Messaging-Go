@@ -1,12 +1,12 @@
 package main
 
 import (
-	p2p "github.com/iancooper/Practical-Messaging-Go/point-to-point/p2pchannel"
+	p2p "github.com/iancooper/Practical-Messaging-Go/publish-subscribe/pubsub"
 	"log"
 )
 
 func main() {
-	channel := p2p.NewChannel("hello-p2p")
+	channel := p2p.NewChannel("hello-pubsub")
 	defer channel.Close()
 
 	ok, message := channel.Receive()
