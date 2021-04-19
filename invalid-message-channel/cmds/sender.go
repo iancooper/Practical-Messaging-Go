@@ -2,17 +2,9 @@ package main
 
 import (
 	"encoding/json"
-	dc "github.com/iancooper/Practical-Messaging-Go/event-consumer/datachannel"
+	dc "github.com/iancooper/Practical-Messaging-Go/datatype-channel/datachannel"
 	"log"
 )
-
-type greeting struct {
-	Message string
-}
-
-func (g greeting) greet(log log.Logger) {
-	log.Println(g.Message)
-}
 
 func main() {
 	producer := dc.NewProducer("invalid-p2p", func(message interface{}) ([]byte, error) {
