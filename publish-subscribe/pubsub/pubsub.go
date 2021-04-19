@@ -24,38 +24,14 @@ func NewChannel(qName string) *Pubsub {
 	failOnError(err, "Failed to connect to RabbitMQ", channel)
 	channel.conn = conn
 
-	ch, err := conn.Channel()
-	failOnError(err, "Failed to open a channel", channel)
-	defer ch.Close()
-
-	err = ch.ExchangeDeclare(
-		exchange, // name
-		"fanout", // type
-		false,    // durable
-		false,    // auto-deleted
-		false,    // internal
-		false,    // no-wait
-		nil,      // arguments
-	)
-	failOnError(err, "Failed to declare an exchange", channel)
-
-	_, err = ch.QueueDeclare(
-		qName, // name
-		false, // durable
-		false, // delete when unused
-		false, // exclusive
-		false, // no-wait
-		nil,   // arguments
-	)
-	failOnError(err, "Failed to declare a queue", channel)
-
-	err = ch.QueueBind(
-		channel.queueName, // queue name
-		"",                // no routing key on fanout
-		exchange,          // exchange
-		false,
-		nil)
-	failOnError(err, "Failed to bind a queue", channel)
+	// # TODO; Declare a fanout exchange, non-durable, and not auto-deleting
+	//
+	//  Optional: Only declare if a consumer (workls without this step byt not realistic)
+	//  TODO: Declare a non-durable queue, exclusive and auto-deleting with no name
+	//  TODO: Get the random queue name from the result of the queue creation operation
+	//  TODO: Bind the queue to the exchante with the returned queue name
+	//
+	//
 
 	return channel
 }
@@ -83,15 +59,8 @@ func (channel *Pubsub) Send(message string) {
 	failOnError(err, "Failed to connect to RabbitMQ", channel)
 	defer ch.Close()
 
-	err = ch.Publish(
-		channel.xchng, //exchange
-		"",            //routing key
-		false,         //mandatory
-		false,         //immediate
-		amqp.Publishing{
-			ContentType: "text/plain",
-			Body:        []byte(message),
-		})
+	//TODO: Publish the message with an empty routing key
+
 	failOnError(err, "Error sending message to RabbitMQ", channel)
 }
 

@@ -58,66 +58,11 @@ func newChannel(qName string) *channel {
 	failOnError(err, "Failed to open a channel", channel)
 	defer ch.Close()
 
-	err = ch.ExchangeDeclare(
-		exchange, // name
-		"direct", // type
-		false,    // durable
-		false,    // auto-deleted
-		false,    // internal
-		false,    // no-wait
-		nil,      // arguments
-	)
-	failOnError(err, "Failed to declare an exchange", channel)
+	// TODO: Create the consumer queue, but pass in the args for the invalid message exchange and routing key
+	// TODO: Declare an invalid message queue exchange, direct and durable
+	// TODO: declare an invalid message queue, durable
+	//TODO: bind the queue to the exchange using the invalid routing key
 
-	_, err = ch.QueueDeclare(
-		qName, // name
-		false, // durable
-		false, // delete when unused
-		false, // exclusive
-		false, // no-wait
-		amqp.Table{"x-dead-letter-exchange": invalid_exchange, "x-dead-letter-routing-key": invalid_routing_key},
-	)
-	failOnError(err, "Failed to declare a queue", channel)
-
-	err = ch.QueueBind(
-		channel.queueName,  // queue name
-		channel.routingKey, // routing key
-		exchange,           // exchange
-		false,
-		nil)
-	failOnError(err, "Failed to bind a queue", channel)
-
-	//We don't need a second exchange, but it's one option to segregate them
-	err = ch.ExchangeDeclare(
-		invalid_exchange, // name
-		"direct",         // type
-		false,            // durable
-		false,            // auto-deleted
-		false,            // internal
-		false,            // no-wait
-		nil,              // arguments
-	)
-	failOnError(err, "Failed to declare a invalid message exchange", channel)
-
-	_, err = ch.QueueDeclare(
-		invalid_routing_key, // name
-		true,                // durable
-		false,               // delete when unused
-		false,               // exclusive
-		false,               // no-wait
-		nil,                 //arguments
-	)
-	failOnError(err, "Failed to declare a queue", channel)
-
-	err = ch.QueueBind(
-		invalid_routing_key, // queue name
-		invalid_routing_key, // routing key
-		invalid_exchange,    // exchange
-		false,
-		nil)
-	failOnError(err, "Failed to bind a queue", channel)
-
-	return channel
 }
 
 //Channel

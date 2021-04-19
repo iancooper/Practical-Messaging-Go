@@ -8,7 +8,7 @@ import (
 
 func main() {
 	producer := dc.NewProducer("data-p2p", func(message interface{}) ([]byte, error) {
-		return json.Marshal(message.(greeting))
+		// TODO: serialize a greeting
 	})
 	defer producer.Close()
 

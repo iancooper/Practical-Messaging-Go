@@ -34,33 +34,19 @@ func (c *Consumer) Receive() {
 	)
 	failOnError(err, "Failed to set QoS", c.Channel)
 
-	msgs, err := ch.Consume(
-		c.queueName,      // queue
-		"event-consumer", // consumer
-		false,            // auto-ack
-		false,            // exclusive
-		false,            // no-local
-		false,            // no-wait
-		nil,              // args
-	)
-	failOnError(err, "Failed to receive from RabbitMQ", c.Channel)
+	//TODO: Consume the queue - will give you back a channel
+	//Note that we move on from Get which polls to Consume here
 
 	forever := make(chan bool)
 
-	go func(c *Consumer) {
-		for msg := range msgs {
-			log.Printf("Received a message: %s", msg.Body)
-			message, err := c.deserialize(msg.Body)
-			if err == nil {
-				c.handle(message)
-				ch.Ack(msg.DeliveryTag, false)
-			} else {
-				ch.Nack(msg.DeliveryTag, false, false) //requeue true will push to DLQ
-				log.Println("Error receiving message", err.Error())
-			}
-
-		}
-	}(c)
+	//TODO:
+	//For each message on the channel
+	//Deserialize (translate) the nessage
+	//if it can be deserialized
+		//Dispatch to the handler
+		//Ack the message
+	//else
+		//Nack the message
 
 	log.Printf(" [*] Waiting for messages. To exit press CTRL+C")
 	<-forever

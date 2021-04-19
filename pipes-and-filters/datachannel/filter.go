@@ -18,18 +18,12 @@ func (f *Filter) Run(transform Transform) {
 	producer := NewProducer("sink-p2p", f.serialize)
 	defer producer.Close()
 
-	msgs := make(chan interface{})
-	consumer := NewConsumer("source-p2p", f.deserialize, func(message interface{}) {
-		msgs <- message
-	})
-	defer consumer.Close()
+	//TODO: Add a consumer, and put messages consumed onto a channel msgs in the handler
 
-	go func(p *Producer) {
-		for msg := range msgs {
-			newMsg := transform(msg)
-			p.Send(newMsg)
-		}
-	}(producer)
+	//TODO:
+	//For each message in msgs
+	//Transform the message
+	//Send the message on
 
 	consumer.Receive()
 }

@@ -30,34 +30,8 @@ func NewChannel(qName string) *P2p {
 	failOnError(err, "Failed to open a channel", channel)
 	defer ch.Close()
 
-	err = ch.ExchangeDeclare(
-		exchange, // name
-		"direct", // type
-		false,    // durable
-		false,    // auto-deleted
-		false,    // internal
-		false,    // no-wait
-		nil,      // arguments
-	)
-	failOnError(err, "Failed to declare an exchange", channel)
-
-	_, err = ch.QueueDeclare(
-		qName, // name
-		false, // durable
-		false, // delete when unused
-		false, // exclusive
-		false, // no-wait
-		nil,   // arguments
-	)
-	failOnError(err, "Failed to declare a queue", channel)
-
-	err = ch.QueueBind(
-		channel.queueName,  // queue name
-		channel.routingKey, // routing key
-		exchange,           // exchange
-		false,
-		nil)
-	failOnError(err, "Failed to bind a queue", channel)
+	// TODO: Declare an exchange, with exchange_name, type direct, non-durable, and not auto-delete on the channel
+	// TODO: Declare a queue with _queue_name, non-durable, non-exclusive, and not auto-delete
 
 	return channel
 }
@@ -67,17 +41,7 @@ func (channel *P2p) Receive() (bool, string) {
 	failOnError(err, "Failed to connect to RabbitMQ", channel)
 	defer ch.Close()
 
-	msg, ok, err := ch.Get(
-		channel.queueName, //queue name
-		true,              //auto ack when we read
-	)
-	failOnError(err, "Failed to receive from RabbitMQ", channel)
-
-	if ok {
-		return true, string(msg.Body[:])
-	} else {
-		return false, ""
-	}
+	//# TODO: use basic_get on the channel to retrieve a message from the queue not using auto_ack
 }
 
 func (channel *P2p) Send(message string) {
@@ -85,16 +49,7 @@ func (channel *P2p) Send(message string) {
 	failOnError(err, "Failed to connect to RabbitMQ", channel)
 	defer ch.Close()
 
-	err = ch.Publish(
-		channel.xchng,      //exchange
-		channel.routingKey, //routing key
-		false,              //mandatory
-		false,              //immediate
-		amqp.Publishing{
-			ContentType: "text/plain",
-			Body:        []byte(message),
-		})
-	failOnError(err, "Error sending message to RabbitMQ", channel)
+	// TODO: publish the message to the exchange using _routing_key n the channel
 }
 
 func (channel *P2p) Close() {

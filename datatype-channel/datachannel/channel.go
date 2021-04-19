@@ -108,7 +108,7 @@ func (c *consumer) Receive() (bool, interface{}) {
 	failOnError(err, "Failed to receive from RabbitMQ", c.Channel)
 
 	if ok {
-		message, err := c.deserialize(msg.Body)
+		// TODO: deserialize the message
 		if err == nil {
 			return true, message
 		} else{
@@ -125,8 +125,7 @@ func (p *Producer) Send(message interface{}) {
 	failOnError(err, "Failed to connect to RabbitMQ", p.Channel)
 	defer ch.Close()
 
-	b, err := p.serialize(message)
-	failOnError(err, "Failed to serialize message", p.Channel)
+	// TODO: serialize the message
 
 	err = ch.Publish(
 		p.xchng,      			//exchange

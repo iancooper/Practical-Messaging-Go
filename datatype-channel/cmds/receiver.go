@@ -7,9 +7,7 @@ import (
 
 func main() {
 	consumer := dc.NewConsumer("data-p2p", func(bytes []byte) (interface{}, error) {
-		var greetings greeting
-		err := json.Unmarshal(bytes, &greetings)
-		return greetings, err
+		//TODO: deserialize from message
 	})
 	defer consumer.Close()
 
