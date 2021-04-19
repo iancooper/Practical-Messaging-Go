@@ -1,4 +1,4 @@
-package main
+package greeting
 
 import (
 	"log"
@@ -7,11 +7,11 @@ import (
 
 //We don't want to share code between sender and receiver, but its convenient for this exercise to do so
 
-type greeting struct{
+type Greeting struct{
 	Message string
 }
 
-func (g greeting) greet(){
+func (g Greeting) Greet(){
 	log.Println("Received message: ", g.Message, "at", time.Now())
 }
 
