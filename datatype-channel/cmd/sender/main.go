@@ -2,17 +2,19 @@ package main
 
 import (
 	"encoding/json"
-	dc "github.com/iancooper/Practical-Messaging-Go/datatype-channel/datachannel"
 	"log"
+
+	. "github.com/iancooper/Practical-Messaging-Go/datatype-channel/cmd"
+	dc "github.com/iancooper/Practical-Messaging-Go/datatype-channel/datachannel"
 )
 
 func main() {
 	producer := dc.NewProducer("data-p2p", func(message interface{}) ([]byte, error) {
-		return json.Marshal(message.(greeting))
+		return json.Marshal(message.(Greeting))
 	})
 	defer producer.Close()
 
-	producer.Send(greeting{
+	producer.Send(Greeting{
 		Message: "Hello World",
 	})
 	log.Println("Sent Message")
