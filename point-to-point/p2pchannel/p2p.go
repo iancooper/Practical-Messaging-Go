@@ -5,7 +5,7 @@ import (
 	"log"
 )
 
-type p2p struct {
+type P2p struct {
 	xchng      string
 	queueName  string
 	routingKey string
@@ -15,9 +15,9 @@ type p2p struct {
 //We just use a contant here for convenience, in reality you configure this
 const exchange = "practical-messaging-go"
 
-func NewChannel(qName string) *p2p {
+func NewChannel(qName string) *P2p {
 
-	channel := new(p2p)
+	channel := new(P2p)
 	channel.xchng = exchange
 	channel.queueName = qName
 	channel.routingKey = qName
@@ -62,7 +62,7 @@ func NewChannel(qName string) *p2p {
 	return channel
 }
 
-func (channel *p2p) Receive() (bool, string) {
+func (channel *P2p) Receive() (bool, string) {
 	ch, err := channel.conn.Channel()
 	failOnError(err, "Failed to connect to RabbitMQ", channel)
 	defer ch.Close()
@@ -80,7 +80,7 @@ func (channel *p2p) Receive() (bool, string) {
 	}
 }
 
-func (channel *p2p) Send(message string) {
+func (channel *P2p) Send(message string) {
 	ch, err := channel.conn.Channel()
 	failOnError(err, "Failed to connect to RabbitMQ", channel)
 	defer ch.Close()
@@ -97,13 +97,13 @@ func (channel *p2p) Send(message string) {
 	failOnError(err, "Error sending message to RabbitMQ", channel)
 }
 
-func (channel *p2p) Close() {
+func (channel *P2p) Close() {
 	if channel.conn != nil {
 		channel.conn.Close()
 	}
 }
 
-func failOnError(err error, msg string, channel *p2p) {
+func failOnError(err error, msg string, channel *P2p) {
 	if err != nil {
 		if channel.conn != nil {
 			channel.conn.Close()

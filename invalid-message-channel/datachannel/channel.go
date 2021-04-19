@@ -12,12 +12,12 @@ type channel struct {
 	conn       *amqp.Connection
 }
 
-type producer struct {
+type Producer struct {
 	*channel
 	serialize Serializer
 }
 
-type consumer struct {
+type Consumer struct {
 	*channel
 	deserialize Deserializer
 }
@@ -28,15 +28,15 @@ type Deserializer func(bytes []byte) (interface{}, error)
 const exchange = "practical-messaging-go"
 const invalid_exchange = "practical-messaging-invalid"
 
-func NewProducer(qName string, serializer Serializer) *producer {
-	producer := new(producer)
+func NewProducer(qName string, serializer Serializer) *Producer {
+	producer := new(Producer)
 	producer.channel = newChannel(qName)
 	producer.serialize = serializer
 	return producer
 }
 
-func NewConsumer(qName string, deserializer Deserializer) *consumer {
-	consumer := new(consumer)
+func NewConsumer(qName string, deserializer Deserializer) *Consumer {
+	consumer := new(Consumer)
 	consumer.channel = newChannel(qName)
 	consumer.deserialize = deserializer
 	return consumer
@@ -128,7 +128,7 @@ func (channel *channel) Close() {
 }
 
 //Consumer
-func (c *consumer) Receive() (bool, interface{}) {
+func (c *Consumer) Receive() (bool, interface{}) {
 	ch, err := c.conn.Channel()
 	failOnError(err, "Failed to connect to RabbitMQ", c.channel)
 	defer ch.Close()
@@ -154,7 +154,7 @@ func (c *consumer) Receive() (bool, interface{}) {
 }
 
 //Producer
-func (p *producer) Send(message interface{}) {
+func (p *Producer) Send(message interface{}) {
 	ch, err := p.conn.Channel()
 	failOnError(err, "Failed to connect to RabbitMQ", p.channel)
 	defer ch.Close()

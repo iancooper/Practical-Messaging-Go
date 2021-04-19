@@ -7,24 +7,24 @@ const invalid_exchange = "practical-messaging-invalid"
 type Handler func(message interface{})
 type Deserializer func(bytes []byte) (interface{}, error)
 
-type consumer struct {
-	*channel
+type Consumer struct {
+	*Channel
 	deserialize Deserializer
 	handle      Handler
 }
 
 //Consumer
-func NewConsumer(qName string, deserializer Deserializer, handler Handler) *consumer {
-	consumer := new(consumer)
-	consumer.channel = newChannel(qName, true)
+func NewConsumer(qName string, deserializer Deserializer, handler Handler) *Consumer {
+	consumer := new(Consumer)
+	consumer.Channel = newChannel(qName, true)
 	consumer.deserialize = deserializer
 	consumer.handle = handler
 	return consumer
 }
 
-func (c *consumer) Receive() {
+func (c *Consumer) Receive() {
 	ch, err := c.conn.Channel()
-	failOnError(err, "Failed to connect to RabbitMQ", c.channel)
+	failOnError(err, "Failed to connect to RabbitMQ", c.Channel)
 	defer ch.Close()
 
 	err = ch.Qos(
@@ -32,7 +32,7 @@ func (c *consumer) Receive() {
 		0,     // prefetch size
 		false, // global
 	)
-	failOnError(err, "Failed to set QoS", c.channel)
+	failOnError(err, "Failed to set QoS", c.Channel)
 
 	msgs, err := ch.Consume(
 		c.queueName,      // queue
@@ -43,11 +43,11 @@ func (c *consumer) Receive() {
 		false,            // no-wait
 		nil,              // args
 	)
-	failOnError(err, "Failed to receive from RabbitMQ", c.channel)
+	failOnError(err, "Failed to receive from RabbitMQ", c.Channel)
 
 	forever := make(chan bool)
 
-	go func(c *consumer) {
+	go func(c *Consumer) {
 		for msg := range msgs {
 			log.Printf("Received a message: %s", msg.Body)
 			message, err := c.deserialize(msg.Body)

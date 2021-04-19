@@ -8,7 +8,7 @@ import (
 //We just use a contant here for convenience, in reality you configure this
 const exchange = "practical-messaging-go"
 
-type channel struct {
+type Channel struct {
 	xchng      string
 	queueName  string
 	routingKey string
@@ -16,9 +16,9 @@ type channel struct {
 }
 
 //Channel
-func newChannel(qName string, declareQueue bool) *channel {
+func newChannel(qName string, declareQueue bool) *Channel {
 
-	channel := new(channel)
+	channel := new(Channel)
 	channel.xchng = exchange
 	channel.queueName = qName
 	channel.routingKey = qName
@@ -50,7 +50,7 @@ func newChannel(qName string, declareQueue bool) *channel {
 	return channel
 }
 
-func newQueue(qName string, err error, ch *amqp.Channel, invalid_routing_key string, channel *channel) {
+func newQueue(qName string, err error, ch *amqp.Channel, invalid_routing_key string, channel *Channel) {
 	_, err = ch.QueueDeclare(
 		qName, // name
 		false, // durable
@@ -100,13 +100,13 @@ func newQueue(qName string, err error, ch *amqp.Channel, invalid_routing_key str
 	failOnError(err, "Failed to bind a queue", channel)
 }
 
-func (channel *channel) Close() {
+func (channel *Channel) Close() {
 	if channel.conn != nil {
 		channel.conn.Close()
 	}
 }
 
-func failOnError(err error, msg string, channel *channel) {
+func failOnError(err error, msg string, channel *Channel) {
 	if err != nil {
 		channel.Close()
 		log.Fatalf("%s: %s", msg, err)

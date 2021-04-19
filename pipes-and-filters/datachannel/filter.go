@@ -1,20 +1,20 @@
 package datachannel
 
-type filter struct {
+type Filter struct {
 	deserialize Deserializer
 	serialize   Serializer
 }
 
 type Transform func(msg interface{}) interface{}
 
-func NewFilter(deserialiser Deserializer, serializer Serializer) *filter {
-	filter := new(filter)
+func NewFilter(deserialiser Deserializer, serializer Serializer) *Filter {
+	filter := new(Filter)
 	filter.deserialize = deserialiser
 	filter.serialize = serializer
 	return filter
 }
 
-func (f *filter) Run(transform Transform) {
+func (f *Filter) Run(transform Transform) {
 	producer := NewProducer("sink-p2p", f.serialize)
 	defer producer.Close()
 

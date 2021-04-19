@@ -5,20 +5,20 @@ import (
 	"log"
 )
 
-type channel struct {
+type Channel struct {
 	xchng      string
 	queueName  string
 	routingKey string
 	conn       *amqp.Connection
 }
 
-type producer struct {
-	*channel
+type Producer struct {
+	*Channel
 	serialize Serializer
 }
 
 type consumer struct {
-	*channel
+	*Channel
 	deserialize Deserializer
 }
 type Serializer func(message interface{}) ([]byte, error)
@@ -27,23 +27,23 @@ type Deserializer func(bytes []byte) (interface{}, error)
 //We just use a contant here for convenience, in reality you configure this
 const exchange = "practical-messaging-go"
 
-func NewProducer(qName string, serializer Serializer) *producer {
-	producer := new(producer)
-	producer.channel = newChannel(qName)
+func NewProducer(qName string, serializer Serializer) *Producer {
+	producer := new(Producer)
+	producer.Channel = newChannel(qName)
 	producer.serialize = serializer
 	return producer
 }
 
 func NewConsumer(qName string, deserializer Deserializer) *consumer {
 	consumer := new(consumer)
-	consumer.channel = newChannel(qName)
+	consumer.Channel = newChannel(qName)
 	consumer.deserialize = deserializer
 	return consumer
 }
 
-func newChannel(qName string) *channel {
+func newChannel(qName string) *Channel {
 
-	channel := new(channel)
+	channel := new(Channel)
 	channel.xchng = exchange
 	channel.queueName = qName
 	channel.routingKey = qName
@@ -89,7 +89,7 @@ func newChannel(qName string) *channel {
 }
 
 //Channel
-func (channel *channel) Close() {
+func (channel *Channel) Close() {
 	if channel.conn != nil {
 		channel.conn.Close()
 	}
@@ -98,14 +98,14 @@ func (channel *channel) Close() {
 //Consumer
 func (c *consumer) Receive() (bool, interface{}) {
 	ch, err := c.conn.Channel()
-	failOnError(err, "Failed to connect to RabbitMQ", c.channel)
+	failOnError(err, "Failed to connect to RabbitMQ", c.Channel)
 	defer ch.Close()
 
 	msg, ok, err := ch.Get(
 		c.queueName, 		 //queue name
 		true,        //auto ack when we read
 	)
-	failOnError(err, "Failed to receive from RabbitMQ", c.channel)
+	failOnError(err, "Failed to receive from RabbitMQ", c.Channel)
 
 	if ok {
 		message, err := c.deserialize(msg.Body)
@@ -120,13 +120,13 @@ func (c *consumer) Receive() (bool, interface{}) {
 }
 
 //Producer
-func (p *producer) Send(message interface{}) {
+func (p *Producer) Send(message interface{}) {
 	ch, err := p.conn.Channel()
-	failOnError(err, "Failed to connect to RabbitMQ", p.channel)
+	failOnError(err, "Failed to connect to RabbitMQ", p.Channel)
 	defer ch.Close()
 
 	b, err := p.serialize(message)
-	failOnError(err, "Failed to serialize message", p.channel)
+	failOnError(err, "Failed to serialize message", p.Channel)
 
 	err = ch.Publish(
 		p.xchng,      			//exchange
@@ -137,10 +137,10 @@ func (p *producer) Send(message interface{}) {
 			ContentType: "text/plain",
 			Body:        b,
 		})
-	failOnError(err, "Error sending message to RabbitMQ", p.channel)
+	failOnError(err, "Error sending message to RabbitMQ", p.Channel)
 }
 
-func failOnError(err error, msg string, channel *channel) {
+func failOnError(err error, msg string, channel *Channel) {
 	if err != nil {
 		channel.Close()
 		log.Fatalf("%s: %s", msg, err)

@@ -5,7 +5,7 @@ import (
 	"log"
 )
 
-type pubsub struct {
+type Pubsub struct {
 	xchng     string
 	queueName string
 	conn      *amqp.Connection
@@ -14,9 +14,9 @@ type pubsub struct {
 //We just use a contant here for convenience, in reality you configure this
 const exchange = "practical-messaging-go-fanout"
 
-func NewChannel(qName string) *pubsub {
+func NewChannel(qName string) *Pubsub {
 
-	channel := new(pubsub)
+	channel := new(Pubsub)
 	channel.xchng = exchange
 	channel.queueName = qName
 
@@ -60,7 +60,7 @@ func NewChannel(qName string) *pubsub {
 	return channel
 }
 
-func (channel *pubsub) Receive() (bool, string) {
+func (channel *Pubsub) Receive() (bool, string) {
 	ch, err := channel.conn.Channel()
 	failOnError(err, "Failed to connect to RabbitMQ", channel)
 	defer ch.Close()
@@ -78,7 +78,7 @@ func (channel *pubsub) Receive() (bool, string) {
 	}
 }
 
-func (channel *pubsub) Send(message string) {
+func (channel *Pubsub) Send(message string) {
 	ch, err := channel.conn.Channel()
 	failOnError(err, "Failed to connect to RabbitMQ", channel)
 	defer ch.Close()
@@ -95,13 +95,13 @@ func (channel *pubsub) Send(message string) {
 	failOnError(err, "Error sending message to RabbitMQ", channel)
 }
 
-func (channel *pubsub) Close() {
+func (channel *Pubsub) Close() {
 	if channel.conn != nil {
 		channel.conn.Close()
 	}
 }
 
-func failOnError(err error, msg string, channel *pubsub) {
+func failOnError(err error, msg string, channel *Pubsub) {
 	if err != nil {
 		if channel.conn != nil {
 			channel.conn.Close()
