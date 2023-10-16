@@ -8,11 +8,11 @@ import (
 
 func main() {
 	producer := dc.NewProducer("source-p2p", func(message interface{}) ([]byte, error) {
-		return json.Marshal(message.(greeting))
+		return json.Marshal(message.(dc.Greeting))
 	})
 	defer producer.Close()
 
-	producer.Send(greeting{
+	producer.Send(dc.Greeting{
 		Message: "Hello World",
 	})
 	log.Println("Sent Message")

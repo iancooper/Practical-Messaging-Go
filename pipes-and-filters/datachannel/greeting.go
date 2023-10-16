@@ -1,23 +1,23 @@
-package main
+package datachannel
 
 import (
 	"log"
 	"time"
 )
 
-type greeting struct {
+type Greeting struct {
 	Message string
 }
 
-func (g greeting) greet(log log.Logger) {
+func (g Greeting) Greet(log log.Logger) {
 	log.Println(g.Message)
 }
 
-type enhancedGreeting struct {
+type EnhancedGreeting struct {
 	Message    string
 	Salutation string
 }
 
-func (g *enhancedGreeting) greet() {
+func (g *EnhancedGreeting) Greet() {
 	log.Println("Received message: To - ", g.Salutation, "Message: ", g.Message, "at ", time.Now())
 }

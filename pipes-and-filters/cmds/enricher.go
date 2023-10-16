@@ -7,17 +7,17 @@ import (
 
 func main() {
 	filter := datachannel.NewFilter(func(bytes []byte) (interface{}, error) {
-		var greetings greeting
+		var greetings datachannel.Greeting
 		err := json.Unmarshal(bytes, &greetings)
 		return greetings, err
 	},
 		func(message interface{}) ([]byte, error) {
-			return json.Marshal(message.(enhancedGreeting))
+			return json.Marshal(message.(datachannel.EnhancedGreeting))
 		})
 
 	filter.Run(
 		func(msg interface{}) interface{} {
-			greeting := msg.(greeting)
-			return enhancedGreeting{Message: greeting.Message, Salutation: "Clarissa Harlowe"}
+			greeting := msg.(datachannel.Greeting)
+			return datachannel.EnhancedGreeting{Message: greeting.Message, Salutation: "Clarissa Harlowe"}
 		})
 }
