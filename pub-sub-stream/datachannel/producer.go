@@ -43,10 +43,24 @@ func (p *Producer) produceMessage(topic, key, value string) error {
 		Timestamp:      time.Now(),
 	}
 
-	err := p.producer.Produce(message, nil)
+	deliveryChan := make(chan kafka.Event)
+
+	err := p.producer.Produce(message, deliveryChan)
 	if err != nil {
 		return err
 	}
+
+	e := <-deliveryChan
+	m := e.(*kafka.Message)
+
+	if m.TopicPartition.Error != nil {
+		fmt.Printf("Delivery failed: %v\n", m.TopicPartition.Error)
+	} else {
+		fmt.Printf("Delivered message to topic %s [%d] at offset %v\n",
+			*m.TopicPartition.Topic, m.TopicPartition.Partition, m.TopicPartition.Offset)
+	}
+
+	close(deliveryChan)
 
 	return nil
 }
@@ -57,11 +71,9 @@ func (p *Producer) Send(message Record) {
 		fmt.Fprintf(os.Stderr, "Error serializing message: %v\n", err)
 	}
 
-	err = p.produceMessage("biographies", message.getId(), b)
+	err = p.produceMessage(p.topic, message.getId(), b)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error producing message: %v\n", err)
-	} else {
-		fmt.Printf("Produced message for %s\n", message.getId())
 	}
 }
 

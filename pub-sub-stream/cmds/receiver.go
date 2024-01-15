@@ -4,8 +4,11 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	_ "github.com/go-sql-driver/mysql"
 	dc "github.com/iancooper/Practical-Messaging-Go/pub-sub-stream/datachannel"
 	"log"
+	"os"
+	"os/signal"
 )
 
 func main() {
@@ -36,6 +39,14 @@ func main() {
 			return nil
 		},
 	)
+
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt)
+	go func() {
+		<-c
+		fmt.Println("Consumer exiting...")
+		os.Exit(1)
+	}()
 
 	consumer.Receive()
 

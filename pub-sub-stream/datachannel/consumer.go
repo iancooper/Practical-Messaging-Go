@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"github.com/confluentinc/confluent-kafka-go/kafka"
 	"os"
-	"os/signal"
-	"syscall"
 )
 
 type Handler func(message interface{}) error
@@ -44,38 +42,27 @@ func (c *Consumer) Receive() {
 
 	defer consumer.Close()
 
-	sigchan := make(chan os.Signal, 1)
-	signal.Notify(sigchan, syscall.SIGINT, syscall.SIGTERM)
-
-	run := true
-	for run == true {
-		select {
-		case sig := <-sigchan:
-			fmt.Printf("Caught signal %v: terminating\n", sig)
-			run = false
-		default:
-			msg, err := consumer.ReadMessage(-1)
+	for {
+		msg, err := consumer.ReadMessage(-1)
+		if err == nil {
+			message, err := c.deserialize(msg.Value)
 			if err == nil {
-				message, err := c.deserialize(msg.Value)
+				err := c.handle(message)
 				if err == nil {
-					err := c.handle(message)
-					if err == nil {
-						partition, err := consumer.StoreMessage(msg)
-						if err != nil {
-							fmt.Printf("Error storing message: %v\n", err)
-						} else {
-							fmt.Printf("Stored message in partition %v\n", partition)
-						}
+					partition, err := consumer.StoreMessage(msg)
+					if err != nil {
+						fmt.Printf("Error storing message: %v\n", err)
 					} else {
-						fmt.Printf("Error handling message: %v\n", err)
+						fmt.Printf("Stored message in partition %v\n", partition)
 					}
 				} else {
-					fmt.Println("Error receiving message", err.Error())
+					fmt.Printf("Error handling message: %v\n", err)
 				}
 			} else {
-				fmt.Printf("Consumer error: %v (%v)\n", err, msg)
+				fmt.Println("Error receiving message", err.Error())
 			}
+		} else {
+			fmt.Printf("Consumer error: %v (%v)\n", err, msg)
 		}
 	}
-
 }
