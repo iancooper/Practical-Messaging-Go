@@ -1,4 +1,4 @@
-module github.com/iancooper/Practical-Messaging-Go/bio-seeder
+module github.com/iancooper/Practical-Messaging-Go/pub-sub-stream
 
 go 1.20
 
