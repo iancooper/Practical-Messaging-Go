@@ -12,6 +12,8 @@ func main() {
 		return string(b), err
 	})
 
+	defer producer.Close()
+
 	biographies := []dc.Biography{
 		{"Clarissa Harlow", "A young woman whose quest for virtue is continually thwarted by her family"},
 		{"Pamela Andrews", "A young woman whose virtue is rewarded."},
@@ -23,5 +25,4 @@ func main() {
 		producer.Send(biography)
 		log.Println("Sent Message " + biography.Id + " " + biography.Description)
 	}
-
 }
