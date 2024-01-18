@@ -1,8 +1,11 @@
 package main
 
 import (
+	"database/sql"
 	"encoding/json"
+	"github.com/iancooper/Practical-Messaging-Go/pipes-and-filters/biography"
 	"github.com/iancooper/Practical-Messaging-Go/pipes-and-filters/datachannel"
+	"log"
 )
 
 func main() {
@@ -18,6 +21,15 @@ func main() {
 	filter.Run(
 		func(msg interface{}) interface{} {
 			greeting := msg.(datachannel.Greeting)
-			return datachannel.EnhancedGreeting{Message: greeting.Message, Salutation: "Clarissa Harlow"}
+
+			db, err := sql.Open("mysql", "root:root@tcp(127.0.0.1:3306)/Lookup")
+			if err != nil {
+				log.Fatal(err)
+			}
+			defer db.Close()
+
+			name := "Clarissa Harlow"
+			bio, err := biography.GetBiography(db, name)
+			return datachannel.EnhancedGreeting{Message: greeting.Message, Salutation: name, Bio: bio}
 		})
 }

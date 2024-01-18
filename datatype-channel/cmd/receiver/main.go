@@ -13,7 +13,7 @@ func main() {
 
 	ok, message := consumer.Receive()
 	if ok {
-		greeting := message.(greeting)
-		greeting.greet()
+		greeting := message.(Greeting)
+		greeting.Greet()
 	}
 }

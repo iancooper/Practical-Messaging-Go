@@ -12,7 +12,7 @@ func main() {
 	})
 	defer producer.Close()
 
-	producer.Send(greeting{
+	producer.Send(Greeting{
 		Message: "Hello World",
 	})
 	log.Println("Sent Message")
