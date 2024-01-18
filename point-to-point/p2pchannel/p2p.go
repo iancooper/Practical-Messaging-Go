@@ -1,26 +1,27 @@
 package p2pchannel
 
 import (
-	"github.com/streadway/amqp"
 	"log"
+
+	"github.com/streadway/amqp"
 )
 
-type P2p struct {
+type P2P struct {
 	xchng      string
 	queueName  string
 	routingKey string
 	conn       *amqp.Connection
 }
 
-//We just use a contant here for convenience, in reality you configure this
+//We just use a constant here for convenience, in reality you'd configure this
 const exchange = "practical-messaging-go"
 
-func NewChannel(qName string) *P2p {
-
-	channel := new(P2p)
-	channel.xchng = exchange
-	channel.queueName = qName
-	channel.routingKey = qName
+func NewChannel(qName string) *P2P {
+	channel := &P2P{
+		xchng:      exchange,
+		queueName:  qName,
+		routingKey: qName,
+	}
 
 	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
 	failOnError(err, "Failed to connect to RabbitMQ", channel)
@@ -62,7 +63,7 @@ func NewChannel(qName string) *P2p {
 	return channel
 }
 
-func (channel *P2p) Receive() (bool, string) {
+func (channel *P2P) Receive() (bool, string) {
 	ch, err := channel.conn.Channel()
 	failOnError(err, "Failed to connect to RabbitMQ", channel)
 	defer ch.Close()
@@ -75,12 +76,12 @@ func (channel *P2p) Receive() (bool, string) {
 
 	if ok {
 		return true, string(msg.Body[:])
-	} else {
-		return false, ""
 	}
+
+	return false, ""
 }
 
-func (channel *P2p) Send(message string) {
+func (channel *P2P) Send(message string) {
 	ch, err := channel.conn.Channel()
 	failOnError(err, "Failed to connect to RabbitMQ", channel)
 	defer ch.Close()
@@ -97,18 +98,18 @@ func (channel *P2p) Send(message string) {
 	failOnError(err, "Error sending message to RabbitMQ", channel)
 }
 
-func (channel *P2p) Close() {
+func (channel *P2P) Close() {
 	if channel.conn != nil {
 		channel.conn.Close()
 	}
 }
 
-func failOnError(err error, msg string, channel *P2p) {
+func failOnError(err error, msg string, channel *P2P) {
 	if err != nil {
 		if channel.conn != nil {
 			channel.conn.Close()
 
-		log.Fatalf("%s: %s", msg, err)
+			log.Fatalf("%s: %s", msg, err)
 		}
 	}
 }

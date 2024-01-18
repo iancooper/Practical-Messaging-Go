@@ -1,8 +1,9 @@
 package main
 
 import (
-	p2p "github.com/iancooper/Practical-Messaging-Go/point-to-point/p2pchannel"
 	"log"
+
+	p2p "github.com/iancooper/Practical-Messaging-Go/point-to-point/p2pchannel"
 )
 
 func main() {
@@ -11,6 +12,6 @@ func main() {
 
 	ok, message := channel.Receive()
 	if ok {
-		log.Println("Received Message", message)
+		log.Printf("Received Message: %v", message)
 	}
 }
