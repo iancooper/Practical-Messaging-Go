@@ -3,7 +3,6 @@ package datachannel
 import (
 	"fmt"
 	"github.com/confluentinc/confluent-kafka-go/kafka"
-	"os"
 )
 
 type Handler func(message interface{}) error
@@ -26,30 +25,26 @@ func NewConsumer(topic string, deserializer Deserializer, handler Handler) *Cons
 
 func (c *Consumer) Receive() {
 	configMap := &kafka.ConfigMap{
-		"bootstrap.servers":        kafkaBrokers,
-		"group.id":                 "SimpleEventing",
-		"session.timeout.ms":       6000,
-		"auto.offset.reset":        "earliest",
-		"enable.auto.offset.store": false,
+		//TODO Configure the consumer
+		// bootstrap.servers
+		// group.id
+		// auto.offset.reset should be earliest
+		// enable.auto.offset.store should be false
 	}
 
-	consumer, err := kafka.NewConsumer(configMap)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error creating Kafka consumer: %v\n", err)
-	}
+	// TODO Create the Kafka Consumer instance
+	// Suscibe the consumer to the topic
 
-	err = consumer.SubscribeTopics([]string{c.topic}, nil)
-
-	defer consumer.Close()
+	// defer consumer.Close()
 
 	for {
-		msg, err := consumer.ReadMessage(-1)
+		// TODO Read the next message from the topic
 		if err == nil {
 			message, err := c.deserialize(msg.Value)
 			if err == nil {
 				err := c.handle(message)
 				if err == nil {
-					partition, err := consumer.StoreMessage(msg)
+					// TODO Store the message (offset)
 					if err != nil {
 						fmt.Printf("Error storing message: %v\n", err)
 					} else {
