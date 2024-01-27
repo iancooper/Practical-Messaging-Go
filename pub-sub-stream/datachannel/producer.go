@@ -18,6 +18,7 @@ type Producer struct {
 }
 
 func NewProducer(topic string, serializer func(message Record) (string, error)) *Producer {
+
 	producer := new(Producer)
 	producer.topic = topic
 	producer.serialize = serializer
@@ -26,12 +27,8 @@ func NewProducer(topic string, serializer func(message Record) (string, error)) 
 		"bootstrap.servers": kafkaBrokers,
 	}
 
-	p, err := kafka.NewProducer(configMap)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error creating Kafka producer: %v\n", err)
-	}
+	// TODO Create the Kafka Producer instance
 
-	producer.producer = p
 	return producer
 }
 
@@ -45,10 +42,7 @@ func (p *Producer) produceMessage(topic, key, value string) error {
 
 	deliveryChan := make(chan kafka.Event)
 
-	err := p.producer.Produce(message, deliveryChan)
-	if err != nil {
-		return err
-	}
+	// TODO Produce the message to the topic
 
 	e := <-deliveryChan
 	m := e.(*kafka.Message)
@@ -78,6 +72,5 @@ func (p *Producer) Send(message Record) {
 }
 
 func (p *Producer) Close() {
-	p.producer.Flush(115 * 1000)
-	p.producer.Close()
+	// TODO Flush and close the producer
 }
