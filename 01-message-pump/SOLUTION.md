@@ -40,6 +40,24 @@ What it costs you, in the order the costs actually arrive:
 calls it. The handler takes `PlaceOrder` and returns. Delete the `import` from
 `model/placeorderhandler.go` and let the compiler find anything you missed.
 
+**Three details, because this is the stage the next exercise is built on:**
+
+- **It is allowed to be thin.** Ours calls `PlaceOrder`'s own deserializer and nothing
+  else. If you decided the mapper *was* the deserializer and called it straight from the pump,
+  you got the right shape for exercise 1 and you will want the seam back in exercise 2 —
+  which is the next point.
+- **It must fail in its own way.** When the body will not decode, the mapper wraps the
+  decoder's error in `ErrUnmappableMessage` rather than returning it as it came. That is not
+  ceremony: an `error` is one interface with one method, so *I could not read this* and
+  *I read it and the work failed* are indistinguishable unless somebody marks one of them.
+  Marking it here is what lets exercise 2 ask `errors.Is`, and exercise 2's entire fix is
+  that question.
+- **It lives on the domain side of the seam.** The contract goes in `simplemessaging/` with the
+  rest of the gateway's vocabulary; the mapper for this particular message goes in
+  `model/`, next to the type it produces. The gateway is generic and must not name
+  `PlaceOrder`; the mapper names `PlaceOrder` and must not name a broker. That is
+  the same rule you just applied to the handler, one file along.
+
 ▎ The check is mechanical and it is the one from the deck: **if a handler's signature has a broker type in it, the mapper has not finished its job.**
 
 ### 2. The pump acknowledged before handling ###
