@@ -5,6 +5,7 @@
 //	go run ./cmd/sender poison          a SKU that is not in the catalogue (queue-side failure)
 //	go run ./cmd/sender unmappable      a body that is not a PlaceOrder (queue-side failure)
 //	go run ./cmd/sender flaky           a lookup that fails twice then works
+//	go run ./cmd/sender slow            an order whose lookup takes 30 seconds
 //	go run ./cmd/sender bad-event       A RECORD THE STREAM CONSUMER CANNOT READ -- straight onto Kafka
 package main
 
